@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>English Diary</title>
+
+  <style>
+    /* =========================================
+       MACBOOK / macOS DESIGN SYSTEM
+       Inspired by the macOS Notes app
+       ========================================= */
+
+    :root {
+      --font:          -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+      --sidebar-bg:    #f0ede8;
+      --sidebar-hover: #e0dcd6;
+      --sidebar-active:#d4cfc9;
+      --window-bar:    #e8e5e0;
+      --content-bg:    #faf9f7;
+      --border:        #d1cec9;
+      --text-primary:  #1c1c1e;
+      --text-secondary:#6c6c70;
+      --text-tertiary: #aeaeb2;
+      --accent:        #f5a623;   /* macOS Notes yellow accent */
+      --dot-red:       #ff5f57;
+      --dot-yellow:    #febc2e;
+      --dot-green:     #28c840;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: #c8c5c0;         /* Desktop background behind the window */
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    /* ── macOS App Window ─────────────────────────────────────────────────── */
+    .window {
+      width: 100%;
+      max-width: 960px;
+      height: 680px;
+      background: var(--content-bg);
+      border-radius: 12px;
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,0.18),
+        0 22px 70px rgba(0,0,0,0.40),
+        0 4px 8px rgba(0,0,0,0.18);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Title Bar ────────────────────────────────────────────────────────── */
+    .title-bar {
+      background: var(--window-bar);
+      border-bottom: 1px solid var(--border);
+      height: 44px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 8px;
+      flex-shrink: 0;
+      -webkit-app-region: drag;
+      user-select: none;
+    }
+
+    /* Traffic light buttons */
+    .dot {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot-red    { background: var(--dot-red);    box-shadow: 0 0 0 0.5px rgba(0,0,0,0.15); }
+    .dot-yellow { background: var(--dot-yellow); box-shadow: 0 0 0 0.5px rgba(0,0,0,0.15); }
+    .dot-green  { background: var(--dot-green);  box-shadow: 0 0 0 0.5px rgba(0,0,0,0.15); }
+
+    .title-bar-label {
+      flex: 1;
+      text-align: center;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      letter-spacing: 0.01em;
+    }
+
+    /* ── Main App Body ────────────────────────────────────────────────────── */
+    .app-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ──────────────────────────────────────────────────────────── */
+    .sidebar {
+      width: 220px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 16px 14px 8px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-tertiary);
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      cursor: pointer;
+      border-radius: 8px;
+      margin: 1px 6px;
+      transition: background 0.15s;
+      font-size: 0.88rem;
+      color: var(--text-primary);
+    }
+    .sidebar-item:hover   { background: var(--sidebar-hover); }
+    .sidebar-item.active  { background: var(--sidebar-active); font-weight: 600; }
+
+    .sidebar-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    .icon-diary  { background: #fff8e1; }
+    .icon-blog1  { background: #e8f5e9; }
+    .icon-blog2  { background: #e3f2fd; }
+    .icon-blog3  { background: #fce4ec; }
+
+    .sidebar-item-text { flex: 1; overflow: hidden; }
+    .sidebar-item-title {
+      font-size: 0.85rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sidebar-item-preview {
+      font-size: 0.73rem;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 1px;
+    }
+
+    .sidebar-toolbar {
+      margin-top: auto;
+      padding: 12px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+    }
+
+    .toolbar-btn {
+      flex: 1;
+      background: rgba(0,0,0,0.06);
+      border: none;
+      border-radius: 7px;
+      padding: 7px 4px;
+      font-family: var(--font);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .toolbar-btn:hover    { background: rgba(0,0,0,0.12); }
+    .toolbar-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .toolbar-btn.save-btn { background: var(--accent); color: white; }
+    .toolbar-btn.save-btn:hover { background: #e6991f; }
+
+    /* ── Content Panel ────────────────────────────────────────────────────── */
+    .content-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .content-toolbar {
+      padding: 10px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      background: var(--content-bg);
+    }
+
+    .grammar-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-family: var(--font);
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .grammar-btn:hover    { background: var(--sidebar-hover); border-color: #b0aca7; color: var(--text-primary); }
+    .grammar-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #status-msg {
+      font-size: 0.8rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      margin-left: auto;
+    }
+    #status-msg.show { opacity: 1; }
+
+    .writing-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 36px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    input, textarea {
+      border: none;
+      outline: none;
+      background: transparent;
+      font-family: var(--font);
+      width: 100%;
+      resize: none;
+      color: var(--text-primary);
+    }
+
+    #diary-title {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 6px;
+      color: var(--text-primary);
+    }
+
+    #diary-date {
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+      margin-bottom: 28px;
+      font-weight: 400;
+    }
+
+    #diary-content {
+      font-size: 1rem;
+      line-height: 1.75;
+      min-height: 380px;
+      color: #3a3a3c;
+    }
+
+    ::placeholder { color: var(--text-tertiary); }
+
+    .writing-area::-webkit-scrollbar { width: 6px; }
+    .writing-area::-webkit-scrollbar-track { background: transparent; }
+    .writing-area::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+  <div class="window">
+
+    <div class="title-bar">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+      <span class="title-bar-label">English Diary — Notes</span>
+    </div>
+
+    <div class="app-body">
+
+      <!-- ── Sidebar ─────────────────────────────────────────────────── -->
+      <aside class="sidebar">
+        <div class="sidebar-header">My Notes</div>
+
+        <!-- Diary entry -->
+        <div class="sidebar-item active" id="nav-diary" onclick="switchNote('diary')">
+          <div class="sidebar-icon icon-diary">📔</div>
+          <div class="sidebar-item-text">
+            <div class="sidebar-item-title">Dear Diary</div>
+            <div class="sidebar-item-preview">My legs throb with…</div>
+          </div>
+        </div>
+
+        <!-- Blog 1 -->
+        <div class="sidebar-item" id="nav-blog1" onclick="switchNote('blog1')">
+          <div class="sidebar-icon icon-blog1">📝</div>
+          <div class="sidebar-item-text">
+            <div class="sidebar-item-title">Blog 1</div>
+            <div class="sidebar-item-preview">The Cold Classroom…</div>
+          </div>
+        </div>
+
+        <!-- Blog 2 -->
+        <div class="sidebar-item" id="nav-blog2" onclick="switchNote('blog2')">
+          <div class="sidebar-icon icon-blog2">🚌</div>
+          <div class="sidebar-item-text">
+            <div class="sidebar-item-title">Blog 2</div>
+            <div class="sidebar-item-preview">Long day…</div>
+          </div>
+        </div>
+
+        <!-- Blog 3 -->
+        <div class="sidebar-item" id="nav-blog3" onclick="switchNote('blog3')">
+          <div class="sidebar-icon icon-blog3">💻</div>
+          <div class="sidebar-item-text">
+            <div class="sidebar-item-title">Blog 3</div>
+            <div class="sidebar-item-preview">The Mask I Wear…</div>
+          </div>
+        </div>
+
+        <div class="sidebar-toolbar">
+          <button class="toolbar-btn save-btn" onclick="saveLocally()">💾 Save</button>
+        </div>
+      </aside>
+
+      <!-- ── Content Panel ────────────────────────────────────────────── -->
+      <div class="content-panel">
+        <div class="content-toolbar">
+          <button class="grammar-btn" id="grammar-btn" onclick="fixGrammar()">
+            ✦ Fix Grammar
+          </button>
+          <span id="status-msg"></span>
+        </div>
+
+        <div class="writing-area">
+          <input  type="text" id="diary-title"   placeholder="Title your day...">
+          <input  type="text" id="diary-date"     placeholder="Date">
+          <textarea           id="diary-content"  placeholder="Start writing here..."></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const DEFAULTS = {
+      diary: {
+        title:   'Dear Diary',
+        date:    'September 22, 2026',
+        content: `My legs throb with every heartbeat. A dull, relentless pulse coiled beneath the desk, dragging me down into the floorboards. I sit completely frozen, holding my breath so no one notices how invisible I feel, wearing this faint, exhausting smile like a mask that doesn't belong to me. The air conditioner cuts across my neck in cold, biting sheets, making my skin prickle with a sudden, restless heat. A sharp itch under the surface, a quiet panic stuck right behind me. Nobody turns around. Nobody sees the storm trapped inside the quiet.
+
+Out past the dirty window, though, the sky is finally splitting open, round and, gold like. That sunset light feels like a quiet hand on my shoulder. It’s freezing and loud inside this room, but out there, the world is still burning with something real. A soft, blinding warmth that knows how to bring me home.`,
+      },
+      blog1: {
+        title:   'The Cold Classroom Light and the Sunset',
+        date:    'Blog 1',
+        content: `Sitting under the bright lights in a classroom can make time feel completely frozen. The long fluorescent bulbs overhead hum with a quiet but constant noise, casting a pale and sterile glare over every single desk. When I sit there quietly while everyone else talks around me, that harsh white light makes the room feel almost too big and very empty. Everything looks washed out, and every minute feels twice as long as it really is. It is so easy to get lost in my own heavy thoughts when the environment feels so cold and loud at the exact same time. The light does not bring any warmth to the room. It just exposes everything and makes me feel like I am entirely separate from the rest of the world.
+
+Things start to shift when I finally turn my head to look toward the tall windows. As the late afternoon slowly turns into evening, the sky outside begins to change its colors in the most beautiful way. The sharp white glare inside the room gives way to deep orange, soft pink, and gentle violet shades that spill across the glass. Watching the sun go down brings a sudden and deep feeling of relief to my chest. That warm outdoor light feels incredibly comforting. It is a quiet reminder that the long and difficult day is finally coming to an end.
+
+Even when the room I am in feels overwhelming and isolating, the sky always changes. It brings a calm atmosphere that makes me feel safe. Looking at those warm colors fading into the dark reminds me of what a real home is supposed to feel like, offering a peaceful escape from the bright and noisy room I am stuck inside.`,
+      },
+      blog2: {
+        title:   'Long day',
+        date:    'Blog 2',
+        content: `By the time I finally sit down in my chair for class, my body is already carrying the entire weight of the morning with it. Walking for miles on the hard ground leaves a deep and lingering ache in my legs. It is a quiet soreness that settles right into my muscles and bones. Every single time I shift my weight or move my feet, I feel that heavy throb beneath the wooden desk. It is a constant reminder of how far I have pushed myself today. The physical exhaustion makes everything else feel heavier, and the simple act of sitting up straight takes an enormous amount of energy that I just do not have right now.
+
+On top of being so physically tired, my stress often shows up in unexpected ways. When I get overwhelmed or anxious, my skin starts to feel incredibly hot and prickly. It creates an annoying and restless itch that makes it nearly impossible to stay still. It is a frustrating feeling because I cannot just scratch it away or make it stop. I have to sit there and try to ignore the uncomfortable heat spreading across my skin. The physical discomfort mixes with my mental exhaustion, creating a storm of feelings that nobody else in the room can see.
+
+It takes a massive amount of hidden energy to sit quietly and pretend that my body is not completely worn out. The people passing by or sitting next to me only see someone quietly working at a desk. They are completely unaware of how sore my muscles truly feel or how much mental effort it takes just to hold myself together. Pushing through that intense fatigue actually shows how much silent strength I have inside. My legs carried me across all those streets and through all those long steps, and taking a moment to acknowledge that deep soreness is just my body asking for a well deserved chance to rest.`,
+      },
+      blog3: {
+        title:   'The Mask I Wear and the Night Air',
+        date:    'Blog 3',
+        content: `It is always surprising to realize how easy it is to feel completely invisible, even when I am surrounded by a room full of people. In a busy and crowded space, it often feels much simpler to put on a polite smile and nod along rather than trying to explain how quiet or distant I feel on the inside. I answer nicely when someone speaks to me, keeping up all the right appearances so nobody worries or asks me any difficult questions. I become an expert at blending into the background, becoming just another face in the classroom while my mind is completely somewhere else.
+
+Holding up that cheerful and polite smile while feeling so disconnected on the inside is an incredibly draining experience. It feels exactly like playing a role in a play where everyone else is just living their lives naturally. I spend so much of my day managing my facial expressions and making sure I do not look as sad or as tired as I actually am. It is a heavy mask to wear hour after hour. I want someone to notice and reach out, but at the exact same time, I am too afraid to let the mask slip. The distance between how I look and how I feel grows wider with every passing minute.
+
+The only real relief comes when the long day finally ends and I can step outside into the open air. The cool evening breeze immediately hits my face, and the heavy pressure to smile simply vanishes into the wind. Looking up, the silver moon rises softly in the dark and quiet sky. The night does not demand anything from me at all. It does not ask me to talk, to smile, or to pretend to be full of energy. Under the gentle and quiet moonlight, I can finally drop the exhausting performance, take a deep breath, and just exist exactly as I am.`,
+      },
+    };
+
+    let currentNote = 'diary';
+
+    const titleEl   = document.getElementById('diary-title');
+    const dateEl    = document.getElementById('diary-date');
+    const contentEl = document.getElementById('diary-content');
+    const statusEl  = document.getElementById('status-msg');
+
+    window.onload = () => {
+      const saved = localStorage.getItem('macbook-english-diary');
+      if (saved) {
+        try {
+          Object.assign(DEFAULTS, JSON.parse(saved));
+        } catch (e) {}
+      }
+      loadNote('diary');
+    };
+
+    function saveCurrentNote() {
+      DEFAULTS[currentNote] = {
+        title:   titleEl.value,
+        date:    dateEl.value,
+        content: contentEl.value,
+      };
+    }
+
+    function switchNote(noteKey) {
+      saveCurrentNote();
+
+      document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+      document.getElementById('nav-' + noteKey).classList.add('active');
+
+      currentNote = noteKey;
+      loadNote(noteKey);
+    }
+
+    function loadNote(noteKey) {
+      const note    = DEFAULTS[noteKey];
+      titleEl.value   = note.title   || '';
+      dateEl.value    = note.date    || '';
+      contentEl.value = note.content || '';
+      document.querySelector('.writing-area').scrollTop = 0;
+    }
+
+    function saveLocally() {
+      saveCurrentNote();
+      localStorage.setItem('macbook-english-diary', JSON.stringify(DEFAULTS));
+      showStatus('Saved ✓', '#28a745');
+    }
+
+    async function fixGrammar() {
+      const btn  = document.getElementById('grammar-btn');
+      const text = contentEl.value.trim();
+      if (!text) return;
+
+      btn.disabled    = true;
+      btn.textContent = '⏳ Checking...';
+
+      try {
+        const res  = await fetch('https://api.languagetool.org/v2/check', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body:    new URLSearchParams({ text, language: 'en-US' })
+        });
+        const data = await res.json();
+
+        if (data.matches && data.matches.length > 0) {
+          let fixed  = text;
+          let count  = 0;
+          const sorted = data.matches.sort((a, b) => b.offset - a.offset);
+
+          for (const match of sorted) {
+            if (match.replacements?.length > 0) {
+              const fix = match.replacements[0].value;
+              fixed = fixed.substring(0, match.offset) + fix + fixed.substring(match.offset + match.length);
+              count++;
+            }
+          }
+
+          contentEl.value = fixed;
+          showStatus(`Fixed ${count} issue${count !== 1 ? 's' : ''} ✓`, '#28a745');
+        } else {
+          showStatus('No issues found ✓', '#007aff');
+        }
+      } catch (err) {
+        showStatus('Could not reach grammar API.', '#ff3b30');
+      } finally {
+        btn.disabled    = false;
+        btn.textContent = '✦ Fix Grammar';
+      }
+    }
+
+    function showStatus(msg, color) {
+      statusEl.textContent = msg;
+      statusEl.style.color = color;
+      statusEl.classList.add('show');
+      setTimeout(() => statusEl.classList.remove('show'), 3000);
+    }
+  </script>
+</body>
+</html>
